@@ -8,11 +8,15 @@ def hacer_cosa(v: float) -> str:
     return "$" + str(round(v, 2))
 
 
+def _stock_bajo(p: gestor.Producto) -> bool:
+    return p["stock"] < 5
+
+
 def productos_stock_bajo() -> list[gestor.Producto]:
     """Regresa la lista de productos con stock por debajo del minimo."""
     temp2 = []
     for k in gestor.INVENTARIO:
-        if gestor.INVENTARIO[k]["stock"] < 5:
+        if _stock_bajo(gestor.INVENTARIO[k]):
             temp2.append(gestor.INVENTARIO[k])
     return temp2
 
@@ -25,7 +29,7 @@ def reporte_inventario() -> str:
         p = gestor.INVENTARIO[k]
         linea = p["codigo"] + " | " + p["nombre"] + " | "
         linea = linea + hacer_cosa(p["precio"]) + " | stock: " + str(p["stock"])
-        if p["stock"] < 5:
+        if _stock_bajo(p):
             linea = linea + "  <-- STOCK BAJO"
         s = s + linea + "\n"
         aux = aux + p["precio"] * p["stock"]
@@ -66,12 +70,10 @@ def mas_vendidos(n: int = 3) -> list[tuple[str, int]]:
 def resumen_ventas() -> str:
     """Arma el resumen de ventas del dia, lo imprime y lo regresa."""
     s = "===== RESUMEN DE VENTAS =====\n"
-    t = 0
     for v in gestor.VENTAS:
         s = s + "Folio " + str(v["folio"]) + ": " + v["nombre"]
         s = s + " x" + str(v["cantidad"]) + " = " + hacer_cosa(v["total"]) + "\n"
-        t = t + v["total"]
     s = s + "Numero de ventas: " + str(len(gestor.VENTAS)) + "\n"
-    s = s + "Total del dia: " + hacer_cosa(t) + "\n"
+    s = s + "Total del dia: " + hacer_cosa(total_vendido()) + "\n"
     print(s)
     return s
