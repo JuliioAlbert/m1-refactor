@@ -28,6 +28,17 @@ Guardar todos los planes como archivos Markdown en `/specs` (raíz del repo; cre
 3. Implementation plan
 4. Acceptance criteria
 5. Decisions
+6. Bitácora (borrador de la fila: prompt literal del usuario, cambio, justificación)
+
+### Bitácora al aplicar un plan
+
+Tras `pytest` + `ruff check src` y antes del commit:
+
+- Si `BITACORA.md` no existe, copiar `BITACORA_TEMPLATE.md` → `BITACORA.md` (Nombre: Julio Gonzalez; Matrícula vacía; Fecha = hoy).
+- Llenar la siguiente fila vacía de la tabla (agregar fila si pasan de 5): `#` consecutivo; Prompt usado (literal, o resumen fiel); Cambio realizado (1 línea + link a `specs/<plan>.md`); Justificación (smell eliminado / regla ruff); Tests OK (`✅ N passed` o `❌` con resultado real de `pytest`, más conteo de errores ruff).
+- Incluir `BITACORA.md` en el mismo commit atómico del plan.
+- No tocar "Reflexión final" (la escribe el usuario).
+- Al fusionar ramas en `refactorizacion`: conservar todas las filas y renumerar.
 
 Al aplicar un plan, crear primero una rama nueva de git (ej. `refactor/<nombre-del-plan>`, mismo nombre que el archivo en `specs/`), guardar ahí los cambios con commits y publicarla en GitHub (`git push -u origin <rama>`). Nunca commitear directo a `main`.
 
