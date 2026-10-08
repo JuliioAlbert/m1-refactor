@@ -53,10 +53,10 @@ def _opcion_agregar_producto() -> None:
     n = input("Nombre: ")
     p = pedir_numero("Precio: ")
     s = pedir_entero("Stock inicial: ")
-    if gestor.agregarProducto(c, n, p, s):
-        print("Producto agregado.")
-    else:
+    if not gestor.agregarProducto(c, n, p, s):
         _mostrar_error()
+        return
+    print("Producto agregado.")
 
 
 def _opcion_registrar_venta() -> None:
@@ -64,20 +64,20 @@ def _opcion_registrar_venta() -> None:
     cant = pedir_entero("Cantidad: ")
     cli = input("Codigo de cliente (enter si no tiene): ")
     v = gestor.registrar_venta(c, cant, cli)
-    if v is not None:
-        print(v["ticket"])
-    else:
+    if v is None:
         _mostrar_error()
+        return
+    print(v["ticket"])
 
 
 def _opcion_cotizar() -> None:
     c = input("Codigo del producto: ")
     cant = pedir_entero("Cantidad: ")
     t = gestor.cotizar(c, cant)
-    if t is not None:
-        print("Total estimado (con IVA): $" + str(t))
-    else:
+    if t is None:
         _mostrar_error()
+        return
+    print("Total estimado (con IVA): $" + str(t))
 
 
 def _opcion_mas_vendidos() -> None:
@@ -87,11 +87,11 @@ def _opcion_mas_vendidos() -> None:
 
 def _opcion_stock_bajo() -> None:
     bajos = reportes.productos_stock_bajo()
-    if len(bajos) == 0:
+    if not bajos:
         print("No hay productos con stock bajo.")
-    else:
-        for p in bajos:
-            print("OJO:", p["nombre"], "solo tiene", p["stock"], "unidades")
+        return
+    for p in bajos:
+        print("OJO:", p["nombre"], "solo tiene", p["stock"], "unidades")
 
 
 ACCIONES: dict[str, Callable[[], object]] = {
@@ -105,13 +105,18 @@ ACCIONES: dict[str, Callable[[], object]] = {
 }
 
 
+def _cargar_datos_iniciales() -> None:
+    if not almacen.hayArchivo(ARCHIVO):
+        return
+    if almacen.cargar_datos(ARCHIVO):
+        print("Datos cargados de", ARCHIVO)
+    else:
+        _mostrar_error()
+
+
 def menu() -> None:
     print("Bienvenido al gestor de la tienda La Esquina")
-    if almacen.hayArchivo(ARCHIVO):
-        if almacen.cargar_datos(ARCHIVO):
-            print("Datos cargados de", ARCHIVO)
-        else:
-            _mostrar_error()
+    _cargar_datos_iniciales()
     while True:
         _imprimir_opciones()
         op = input("Opcion: ")
@@ -124,8 +129,8 @@ def menu() -> None:
         accion = ACCIONES.get(op)
         if accion is None:
             print("Opcion no valida.")
-        else:
-            accion()
+            continue
+        accion()
 
 
 if __name__ == "__main__":
