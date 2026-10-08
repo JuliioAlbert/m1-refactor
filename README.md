@@ -18,16 +18,23 @@ Code como asistente.
 
 ```
 .
+├── CLAUDE.md            # Instrucciones para Claude Code
+├── .claudeignore        # Archivos que Claude Code ignora
+├── README.md            # Documentación del proyecto
+├── requirements.txt     # Dependencias
+├── pyproject.toml       # Configuración del linter (ruff) — NO la modifiques
+├── datos_ejemplo.json   # Datos de ejemplo para el menú interactivo
+├── BITACORA_TEMPLATE.md # Plantilla original de la bitácora
 ├── src/
 │   ├── gestor.py        # Lógica de productos y ventas
 │   ├── almacen.py       # Carga y guardado de datos (JSON)
 │   ├── reportes.py      # Reportes e indicadores
 │   └── main.py          # Menú interactivo de consola
 ├── tests/               # Suite de pruebas (pytest) — NO la modifiques
-├── datos_ejemplo.json   # Datos de ejemplo para el menú interactivo
-├── requirements.txt
-├── pyproject.toml       # Configuración del linter (ruff) — NO la modifiques
-└── BITACORA_TEMPLATE.md # Plantilla para tu bitácora de prompts
+├── specs/               # Plan de cada refactorización
+└── docs/
+    ├── bitacora.md      # Registro de cada refactorización
+    └── reflexion.md     # Aprendizajes y conclusiones
 ```
 
 ## Instalación y ejecución
@@ -133,7 +140,7 @@ Trabaja en un **fork** de este repositorio y sigue estos pasos:
    el comportamiento y debes corregirla. **No está permitido modificar los
    tests** para hacerlos pasar.
 5. **Documenta cada prompt en la bitácora.** Copia `BITACORA_TEMPLATE.md` a
-   `BITACORA.md` y llena una fila por refactorización: prompt usado, cambio
+   `docs/bitacora.md` y llena una fila por refactorización: prompt usado, cambio
    realizado, justificación y resultado de los tests. Cierra con tu reflexión.
 6. **Entrega mediante Pull Request** hacia tu propio repositorio (rama
    `refactorizacion` → `main`), con commits atómicos (idealmente uno por
