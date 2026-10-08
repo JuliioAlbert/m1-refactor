@@ -3,8 +3,8 @@
 import math
 from collections.abc import Callable
 
-import gestor
 import almacen
+import gestor
 import reportes
 
 ARCHIVO_DATOS = "datos_ejemplo.json"
