@@ -9,12 +9,13 @@ Reto de refactorización: app de consola en Python (inventario y ventas, tienda 
 - Install: `pip install -r requirements.txt` (pytest, ruff; Python >= 3.10)
 - Tests: `pytest`; one test: `pytest tests/test_gestor.py::<nombre_del_test>`
 - Lint: `ruff check src` (meta final: 0 errores; `--fix` solo arregla lo trivial). Tests no se lintean.
+- Format: `ruff format src` (verificar con `ruff format --check src`, debe dar 0 pendientes)
 - Run app: `cd src && python main.py` (carga `datos_ejemplo.json` relativo al cwd, así que desde `src/` no lo encuentra salvo que exista ahí)
 
 ## Reglas del reto
 
 - NO modificar `tests/` ni `pyproject.toml` (config de ruff: C90 max-complexity 10, naming PEP 8, SIM, UP, etc.).
-- Comportamiento observable idéntico; los tests son de caja negra. Correr `pytest` y `ruff check src` tras CADA refactorización.
+- Comportamiento observable idéntico; los tests son de caja negra. Correr `pytest`, `ruff check src` y `ruff format --check src` tras CADA refactorización.
 - `agregarProducto` y `buscarProducto` conservan su nombre (los tests los usan; están en `ignore-names`).
 - Entrega: rama `refactorizacion` → PR a `main`, commits atómicos (uno por refactorización), `BITACORA.md` (copia de `BITACORA_TEMPLATE.md`) con prompt/cambio/justificación/resultado de tests por refactorización + reflexión. Mínimo 5 refactorizaciones significativas.
 - `.claudeignore` es parte de la entrega (excluye venvs, cachés, datos generados).

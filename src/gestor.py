@@ -24,6 +24,7 @@ class Venta(TypedDict):
     fecha: str
     ticket: str
 
+
 # ---------------------------------------------------------------
 # Estado global de la aplicacion (inventario, ventas y contadores)
 # ---------------------------------------------------------------
@@ -59,9 +60,7 @@ def reiniciar_sistema() -> None:
     ultimo_error = ""
 
 
-def agregarProducto(
-    codigo: str | None, nombre: str, precio: float, stock: int
-) -> bool:
+def agregarProducto(codigo: str | None, nombre: str, precio: float, stock: int) -> bool:
     # valida los datos y da de alta un producto en el inventario
     global ultimo_error
     if not codigo:
