@@ -7,15 +7,15 @@ import gestor
 import almacen
 import reportes
 
-ARCHIVO = "datos_ejemplo.json"
+ARCHIVO_DATOS = "datos_ejemplo.json"
 
 
 def pedir_numero(mensaje: str) -> float:
     # pide un numero al usuario hasta que escriba algo valido
     while True:
-        temp2 = input(mensaje)
+        entrada = input(mensaje)
         try:
-            numero = float(temp2)
+            numero = float(entrada)
         except ValueError:
             numero = math.nan
         if math.isfinite(numero):
@@ -49,49 +49,51 @@ def _imprimir_opciones() -> None:
 
 
 def _opcion_agregar_producto() -> None:
-    c = input("Codigo: ")
-    n = input("Nombre: ")
-    p = pedir_numero("Precio: ")
-    s = pedir_entero("Stock inicial: ")
-    if not gestor.agregarProducto(c, n, p, s):
+    codigo = input("Codigo: ")
+    nombre = input("Nombre: ")
+    precio = pedir_numero("Precio: ")
+    stock = pedir_entero("Stock inicial: ")
+    if not gestor.agregarProducto(codigo, nombre, precio, stock):
         _mostrar_error()
         return
     print("Producto agregado.")
 
 
 def _opcion_registrar_venta() -> None:
-    c = input("Codigo del producto: ")
-    cant = pedir_entero("Cantidad: ")
-    cli = input("Codigo de cliente (enter si no tiene): ")
-    v = gestor.registrar_venta(c, cant, cli)
-    if v is None:
+    codigo = input("Codigo del producto: ")
+    cantidad = pedir_entero("Cantidad: ")
+    cliente = input("Codigo de cliente (enter si no tiene): ")
+    venta = gestor.registrar_venta(codigo, cantidad, cliente)
+    if venta is None:
         _mostrar_error()
         return
-    print(v["ticket"])
+    print(venta["ticket"])
 
 
 def _opcion_cotizar() -> None:
-    c = input("Codigo del producto: ")
-    cant = pedir_entero("Cantidad: ")
-    t = gestor.cotizar(c, cant)
-    if t is None:
+    codigo = input("Codigo del producto: ")
+    cantidad = pedir_entero("Cantidad: ")
+    total = gestor.cotizar(codigo, cantidad)
+    if total is None:
         _mostrar_error()
         return
-    print("Total estimado (con IVA): $" + str(t))
+    print("Total estimado (con IVA): $" + str(total))
 
 
 def _opcion_mas_vendidos() -> None:
-    for par in reportes.mas_vendidos():
-        print(par[0], "->", par[1], "unidades")
+    for codigo, unidades in reportes.mas_vendidos():
+        print(codigo, "->", unidades, "unidades")
 
 
 def _opcion_stock_bajo() -> None:
-    bajos = reportes.productos_stock_bajo()
-    if not bajos:
+    productos_bajos = reportes.productos_stock_bajo()
+    if not productos_bajos:
         print("No hay productos con stock bajo.")
         return
-    for p in bajos:
-        print("OJO:", p["nombre"], "solo tiene", p["stock"], "unidades")
+    for producto in productos_bajos:
+        print(
+            "OJO:", producto["nombre"], "solo tiene", producto["stock"], "unidades"
+        )
 
 
 ACCIONES: dict[str, Callable[[], object]] = {
@@ -106,10 +108,10 @@ ACCIONES: dict[str, Callable[[], object]] = {
 
 
 def _cargar_datos_iniciales() -> None:
-    if not almacen.hayArchivo(ARCHIVO):
+    if not almacen.existe_archivo(ARCHIVO_DATOS):
         return
-    if almacen.cargar_datos(ARCHIVO):
-        print("Datos cargados de", ARCHIVO)
+    if almacen.cargar_datos(ARCHIVO_DATOS):
+        print("Datos cargados de", ARCHIVO_DATOS)
     else:
         _mostrar_error()
 
@@ -119,14 +121,14 @@ def menu() -> None:
     _cargar_datos_iniciales()
     while True:
         _imprimir_opciones()
-        op = input("Opcion: ")
-        if op == "8":
-            if almacen.guardar_datos(ARCHIVO):
+        opcion = input("Opcion: ")
+        if opcion == "8":
+            if almacen.guardar_datos(ARCHIVO_DATOS):
                 print("Datos guardados. Hasta luego.")
             else:
                 _mostrar_error()
             break
-        accion = ACCIONES.get(op)
+        accion = ACCIONES.get(opcion)
         if accion is None:
             print("Opcion no valida.")
             continue

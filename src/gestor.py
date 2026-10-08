@@ -29,7 +29,7 @@ class Venta(TypedDict):
 # ---------------------------------------------------------------
 INVENTARIO: dict[str, Producto] = {}
 VENTAS: list[Venta] = []
-contadorVentas: int = 0
+contador_ventas: int = 0
 ultimo_error: str = ""
 
 # Reglas de negocio: descuentos (minimo de subtotal, tasa), de mayor a menor
@@ -37,6 +37,7 @@ DESCUENTOS_VOLUMEN = ((1000, 0.10), (500, 0.05))
 PREFIJO_VIP = "VIP"
 MONTO_MINIMO_VIP = 200
 DESCUENTO_VIP = 0.02
+TASA_IVA = 0.16
 
 # Motivos de error que se dejan en ultimo_error
 ERROR_CODIGO_VACIO = "codigo vacio"
@@ -51,10 +52,10 @@ ERROR_STOCK_INSUFICIENTE = "stock insuficiente"
 
 def reiniciar_sistema() -> None:
     """Borra todo el estado del sistema (inventario, ventas y folios)."""
-    global contadorVentas, ultimo_error
+    global contador_ventas, ultimo_error
     INVENTARIO.clear()
     VENTAS.clear()
-    contadorVentas = 0
+    contador_ventas = 0
     ultimo_error = ""
 
 
@@ -75,13 +76,13 @@ def agregarProducto(
     if stock < 0:
         ultimo_error = ERROR_STOCK
         return False
-    x: Producto = {
+    producto: Producto = {
         "codigo": codigo,
         "nombre": nombre,
         "precio": precio,
         "stock": stock,
     }
-    INVENTARIO[codigo] = x
+    INVENTARIO[codigo] = producto
     return True
 
 
@@ -101,21 +102,21 @@ def actualizar_stock(codigo: str, cantidad: int) -> bool:
     if codigo not in INVENTARIO:
         ultimo_error = ERROR_NO_EXISTE
         return False
-    aux = INVENTARIO[codigo]["stock"] + cantidad
-    if aux < 0:
+    nuevo_stock = INVENTARIO[codigo]["stock"] + cantidad
+    if nuevo_stock < 0:
         ultimo_error = ERROR_STOCK_NEGATIVO
         return False
-    INVENTARIO[codigo]["stock"] = aux
+    INVENTARIO[codigo]["stock"] = nuevo_stock
     return True
 
 
 def buscarProducto(texto: str) -> list[Producto]:
     # busca productos cuyo nombre contenga el texto (sin importar mayusculas)
-    temp2 = []
-    for k in INVENTARIO:
-        if texto.lower() in INVENTARIO[k]["nombre"].lower():
-            temp2.append(INVENTARIO[k])
-    return temp2
+    encontrados = []
+    for producto in INVENTARIO.values():
+        if texto.lower() in producto["nombre"].lower():
+            encontrados.append(producto)
+    return encontrados
 
 
 def _cantidad_invalida(cantidad: int | None) -> bool:
@@ -153,25 +154,27 @@ def _es_vip(cliente: str | None) -> bool:
     return bool(cliente) and cliente.startswith(PREFIJO_VIP)
 
 
-def _descuento_vip(subtotal: float, desc: float, cliente: str | None) -> float:
+def _descuento_vip(
+    subtotal: float, descuento_previo: float, cliente: str | None
+) -> float:
     """Extra VIP: solo si la compra (ya con descuento) pasa del monto minimo."""
-    if _es_vip(cliente) and subtotal - desc > MONTO_MINIMO_VIP:
+    if _es_vip(cliente) and subtotal - descuento_previo > MONTO_MINIMO_VIP:
         return subtotal * DESCUENTO_VIP
     return 0
 
 
 def _armar_ticket(venta: Venta) -> str:
     """Arma el ticket en texto plano a partir de la venta."""
-    t = "TIENDA LA ESQUINA\n"
-    t = t + "----------------------------\n"
-    t = t + "Folio: " + str(venta["folio"]) + "\n"
-    t = t + venta["nombre"] + " x" + str(venta["cantidad"]) + "\n"
-    t = t + "Subtotal: $" + str(venta["subtotal"]) + "\n"
+    ticket = "TIENDA LA ESQUINA\n"
+    ticket = ticket + "----------------------------\n"
+    ticket = ticket + "Folio: " + str(venta["folio"]) + "\n"
+    ticket = ticket + venta["nombre"] + " x" + str(venta["cantidad"]) + "\n"
+    ticket = ticket + "Subtotal: $" + str(venta["subtotal"]) + "\n"
     if venta["descuento"] > 0:
-        t = t + "Descuento: -$" + str(venta["descuento"]) + "\n"
-    t = t + "IVA: $" + str(venta["impuesto"]) + "\n"
-    t = t + "TOTAL: $" + str(venta["total"]) + "\n"
-    return t
+        ticket = ticket + "Descuento: -$" + str(venta["descuento"]) + "\n"
+    ticket = ticket + "IVA: $" + str(venta["impuesto"]) + "\n"
+    ticket = ticket + "TOTAL: $" + str(venta["total"]) + "\n"
+    return ticket
 
 
 def registrar_venta(
@@ -183,26 +186,26 @@ def registrar_venta(
     genera el folio, arma el ticket y guarda el registro en la lista de
     ventas. Si algo falla regresa None y deja el motivo en ultimo_error.
     """
-    global contadorVentas
+    global contador_ventas
     producto = _validar_venta(codigo, cantidad)
     if producto is None:
         return None
     subtotal = producto["precio"] * cantidad
-    desc = _descuento_volumen(subtotal)
-    desc = desc + _descuento_vip(subtotal, desc, cliente)
-    base = subtotal - desc
-    impuesto = base * 0.16
+    descuento = _descuento_volumen(subtotal)
+    descuento = descuento + _descuento_vip(subtotal, descuento, cliente)
+    base_gravable = subtotal - descuento
+    impuesto = base_gravable * TASA_IVA
     producto["stock"] = producto["stock"] - cantidad
-    contadorVentas = contadorVentas + 1
+    contador_ventas = contador_ventas + 1
     venta = {}
-    venta["folio"] = contadorVentas
+    venta["folio"] = contador_ventas
     venta["codigo"] = codigo
     venta["nombre"] = producto["nombre"]
     venta["cantidad"] = cantidad
     venta["subtotal"] = round(subtotal, 2)
-    venta["descuento"] = round(desc, 2)
+    venta["descuento"] = round(descuento, 2)
     venta["impuesto"] = round(impuesto, 2)
-    venta["total"] = round(base + impuesto, 2)
+    venta["total"] = round(base_gravable + impuesto, 2)
     venta["cliente"] = cliente
     venta["fecha"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     venta["ticket"] = _armar_ticket(venta)
@@ -220,5 +223,5 @@ def cotizar(codigo: str, cantidad: int | None) -> float | None:
         ultimo_error = ERROR_CANTIDAD
         return None
     subtotal = INVENTARIO[codigo]["precio"] * cantidad
-    base = subtotal - _descuento_volumen(subtotal)
-    return round(base + base * 0.16, 2)
+    base_gravable = subtotal - _descuento_volumen(subtotal)
+    return round(base_gravable + base_gravable * TASA_IVA, 2)
