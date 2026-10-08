@@ -91,9 +91,7 @@ def _opcion_stock_bajo() -> None:
         print("No hay productos con stock bajo.")
         return
     for producto in productos_bajos:
-        print(
-            "OJO:", producto["nombre"], "solo tiene", producto["stock"], "unidades"
-        )
+        print("OJO:", producto["nombre"], "solo tiene", producto["stock"], "unidades")
 
 
 ACCIONES: dict[str, Callable[[], object]] = {

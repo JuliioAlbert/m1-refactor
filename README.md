@@ -32,24 +32,82 @@ Code como asistente.
 
 ## Instalación y ejecución
 
-Requiere Python 3.10 o superior.
+### Requisitos previos
+
+- **Python 3.10 o superior** (verificado con 3.11 y 3.14).
+- **pip** y **git**.
+- Dependencias (`requirements.txt`): `pytest>=8.0` y `ruff>=0.6` (verificado con pytest 9.1.1 y ruff 0.16.10).
+
+### Clonar e instalar
 
 ```bash
-# 1. Crear y activar un entorno virtual
+# 1. Clonar el repositorio
+git clone https://github.com/JuliioAlbert/m1-refactor.git
+cd m1-refactor
+
+# 2. Crear y activar un entorno virtual
 python -m venv .venv
 source .venv/bin/activate        # En Windows: .venv\Scripts\activate
 
-# 2. Instalar dependencias
+# 3. Instalar dependencias
 pip install -r requirements.txt
+```
 
-# 3. Ejecutar la suite de pruebas (deben pasar TODAS)
-pytest
+### Ejecutar los tests
 
-# 4. Ejecutar el linter (al inicio reporta ~20 problemas; al final: 0)
-ruff check src
+```bash
+pytest          # o `pytest -v` para ver cada test
+```
 
-# 5. (Opcional) Probar la aplicación interactiva
+### Ejecutar el linter
+
+```bash
+ruff check src             # debe reportar 0 errores
+ruff format --check src    # debe reportar 0 archivos por reformatear
+```
+
+### Ejecutar la aplicación (opcional)
+
+```bash
 cd src && python main.py
+```
+
+### Evidencia de tests pasando
+
+Salida real (2026-10-07, rama `refactor/aplicar-ruff-format`):
+
+```text
+$ pytest -v
+collected 20 items
+
+tests/test_almacen.py::test_guardar_y_cargar_conserva_los_datos PASSED   [  5%]
+tests/test_almacen.py::test_el_folio_continua_despues_de_recargar PASSED [ 10%]
+tests/test_almacen.py::test_cargar_archivo_inexistente_regresa_false PASSED [ 15%]
+tests/test_gestor.py::test_agregar_producto_queda_en_inventario PASSED   [ 20%]
+tests/test_gestor.py::test_rechaza_altas_invalidas PASSED                [ 25%]
+tests/test_gestor.py::test_actualizar_stock_suma_y_resta PASSED          [ 30%]
+tests/test_gestor.py::test_eliminar_producto PASSED                      [ 35%]
+tests/test_gestor.py::test_buscar_producto_por_nombre PASSED             [ 40%]
+tests/test_gestor.py::test_venta_descuenta_stock_y_asigna_folio PASSED   [ 45%]
+tests/test_gestor.py::test_venta_sin_descuento_aplica_iva PASSED         [ 50%]
+tests/test_gestor.py::test_venta_con_descuento_por_volumen_medio PASSED  [ 55%]
+tests/test_gestor.py::test_venta_con_descuento_por_volumen_alto PASSED   [ 60%]
+tests/test_gestor.py::test_venta_cliente_vip_recibe_descuento_extra PASSED [ 65%]
+tests/test_gestor.py::test_venta_rechaza_stock_insuficiente PASSED       [ 70%]
+tests/test_gestor.py::test_venta_rechaza_producto_inexistente_y_cantidad_invalida PASSED [ 75%]
+tests/test_gestor.py::test_cotizar_coincide_con_el_total_de_la_venta PASSED [ 80%]
+tests/test_reportes.py::test_stock_bajo_detecta_los_correctos PASSED     [ 85%]
+tests/test_reportes.py::test_total_vendido_suma_las_ventas PASSED        [ 90%]
+tests/test_reportes.py::test_mas_vendidos_ordena_por_unidades PASSED     [ 95%]
+tests/test_reportes.py::test_reporte_inventario_marca_stock_bajo PASSED  [100%]
+
+============================== 20 passed in 0.02s ==============================
+
+$ ruff check src
+All checks passed!
+
+$ ruff format --check src
+4 files already formatted
 ```
 
 ## Instrucciones del reto
