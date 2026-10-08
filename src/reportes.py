@@ -2,6 +2,8 @@
 
 import gestor
 
+STOCK_MINIMO = 5
+
 
 def hacer_cosa(v: float) -> str:
     # le da formato de dinero al numero
@@ -9,16 +11,12 @@ def hacer_cosa(v: float) -> str:
 
 
 def _stock_bajo(p: gestor.Producto) -> bool:
-    return p["stock"] < 5
+    return p["stock"] < STOCK_MINIMO
 
 
 def productos_stock_bajo() -> list[gestor.Producto]:
     """Regresa la lista de productos con stock por debajo del minimo."""
-    temp2 = []
-    for k in gestor.INVENTARIO:
-        if _stock_bajo(gestor.INVENTARIO[k]):
-            temp2.append(gestor.INVENTARIO[k])
-    return temp2
+    return [p for p in gestor.INVENTARIO.values() if _stock_bajo(p)]
 
 
 def reporte_inventario() -> str:
@@ -50,10 +48,7 @@ def mas_vendidos(n: int = 3) -> list[tuple[str, int]]:
     """Regresa los n productos mas vendidos como lista de (codigo, unidades)."""
     aux = {}
     for v in gestor.VENTAS:
-        if v["codigo"] in aux:
-            aux[v["codigo"]] = aux[v["codigo"]] + v["cantidad"]
-        else:
-            aux[v["codigo"]] = v["cantidad"]
+        aux[v["codigo"]] = aux.get(v["codigo"], 0) + v["cantidad"]
     temp = []
     for k in aux:
         temp.append((k, aux[k]))

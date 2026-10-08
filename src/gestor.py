@@ -32,6 +32,12 @@ VENTAS: list[Venta] = []
 contadorVentas: int = 0
 ultimo_error: str = ""
 
+# Reglas de negocio: descuentos (minimo de subtotal, tasa), de mayor a menor
+DESCUENTOS_VOLUMEN = ((1000, 0.10), (500, 0.05))
+PREFIJO_VIP = "VIP"
+MONTO_MINIMO_VIP = 200
+DESCUENTO_VIP = 0.02
+
 # Motivos de error que se dejan en ultimo_error
 ERROR_CODIGO_VACIO = "codigo vacio"
 ERROR_NO_EXISTE = "producto no existe"
@@ -57,7 +63,7 @@ def agregarProducto(
 ) -> bool:
     # valida los datos y da de alta un producto en el inventario
     global ultimo_error
-    if codigo is None or codigo == "":
+    if not codigo:
         ultimo_error = ERROR_CODIGO_VACIO
         return False
     if codigo in INVENTARIO:
@@ -112,16 +118,20 @@ def buscarProducto(texto: str) -> list[Producto]:
     return temp2
 
 
+def _cantidad_invalida(cantidad: int | None) -> bool:
+    return cantidad is None or cantidad <= 0
+
+
 def _validar_venta(codigo: str | None, cantidad: int | None) -> Producto | None:
     """Regresa el producto si la venta es valida; si no, fija ultimo_error."""
     global ultimo_error
-    if codigo is None or codigo == "":
+    if not codigo:
         ultimo_error = ERROR_CODIGO_VACIO
         return None
     if codigo not in INVENTARIO:
         ultimo_error = ERROR_NO_EXISTE
         return None
-    if cantidad is None or cantidad <= 0:
+    if _cantidad_invalida(cantidad):
         ultimo_error = ERROR_CANTIDAD
         return None
     if INVENTARIO[codigo]["stock"] < cantidad:
@@ -132,16 +142,22 @@ def _validar_venta(codigo: str | None, cantidad: int | None) -> Producto | None:
 
 def _descuento_volumen(subtotal: float) -> float:
     """Descuento por volumen: 10% desde $1000, 5% desde $500."""
-    if subtotal >= 1000:
-        return subtotal * 0.10
-    if subtotal >= 500:
-        return subtotal * 0.05
+    for minimo, tasa in DESCUENTOS_VOLUMEN:
+        if subtotal >= minimo:
+            return subtotal * tasa
     return 0
 
 
 def _es_vip(cliente: str | None) -> bool:
     """Los clientes cuyo codigo empieza con VIP tienen descuento extra."""
-    return bool(cliente) and cliente[:3] == "VIP"
+    return bool(cliente) and cliente.startswith(PREFIJO_VIP)
+
+
+def _descuento_vip(subtotal: float, desc: float, cliente: str | None) -> float:
+    """Extra VIP: solo si la compra (ya con descuento) pasa del monto minimo."""
+    if _es_vip(cliente) and subtotal - desc > MONTO_MINIMO_VIP:
+        return subtotal * DESCUENTO_VIP
+    return 0
 
 
 def _armar_ticket(venta: Venta) -> str:
@@ -173,9 +189,7 @@ def registrar_venta(
         return None
     subtotal = producto["precio"] * cantidad
     desc = _descuento_volumen(subtotal)
-    # el extra VIP aplica solo si la compra (ya con descuento) pasa de cierto monto
-    if _es_vip(cliente) and subtotal - desc > 200:
-        desc = desc + subtotal * 0.02
+    desc = desc + _descuento_vip(subtotal, desc, cliente)
     base = subtotal - desc
     impuesto = base * 0.16
     producto["stock"] = producto["stock"] - cantidad
@@ -202,7 +216,7 @@ def cotizar(codigo: str, cantidad: int | None) -> float | None:
     if codigo not in INVENTARIO:
         ultimo_error = ERROR_NO_EXISTE
         return None
-    if cantidad is None or cantidad <= 0:
+    if _cantidad_invalida(cantidad):
         ultimo_error = ERROR_CANTIDAD
         return None
     subtotal = INVENTARIO[codigo]["precio"] * cantidad
