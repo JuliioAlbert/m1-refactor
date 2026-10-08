@@ -12,7 +12,7 @@ Después de cada cambio ejecuta `pytest` y anota el resultado.
 | #  | Prompt usado | Cambio realizado | Justificación | Tests OK |
 |----|--------------|------------------|---------------|----------|
 | 1  |  Eliminar código muerto y comentarios obsoletos de `src/` sin cambiar comportamiento | Se borran `MODO_DEBUG`, `calcular_descuento_viejo`, `exportar_txt` comentado, `import os` sin uso, `reporteViejoCSV`, cabeceras `# -*- coding -*-` y frase obsoleta del docstring. Plan: [specs/eliminar-codigo-muerto.md](specs/eliminar-codigo-muerto.md) (commit 3392724) | Menos ruido y código no referenciado; elimina errores ruff F401, ERA001, UP009, N802 (1) y SIM115 | ✅ 20 passed |
-| 2  |              |                  |               |          |
+| 2  | Agregar type hints a funciones | Type hints en todas las funciones de `src/`, `TypedDict` `Producto`/`Venta` y globals anotados. Plan: [specs/agregar-type-hints.md](specs/agregar-type-hints.md) | Contratos implícitos (dicts sin forma, retornos `X \| None`) quedan explícitos; habilita chequeo estático y autocompletado sin cambiar comportamiento | ✅ 20 passed; ruff 13 errores (sin cambio) |
 | 3  |              |                  |               |          |
 | 4  |              |                  |               |          |
 | 5  |              |                  |               |          |

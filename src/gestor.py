@@ -1,17 +1,39 @@
 """Modulo principal del gestor de inventario y ventas de "La Esquina"."""
 
 from datetime import datetime
+from typing import TypedDict
+
+
+class Producto(TypedDict):
+    codigo: str
+    nombre: str
+    precio: float
+    stock: int
+
+
+class Venta(TypedDict):
+    folio: int
+    codigo: str
+    nombre: str
+    cantidad: int
+    subtotal: float
+    descuento: float
+    impuesto: float
+    total: float
+    cliente: str | None
+    fecha: str
+    ticket: str
 
 # ---------------------------------------------------------------
 # Estado global de la aplicacion (inventario, ventas y contadores)
 # ---------------------------------------------------------------
-INVENTARIO = {}
-VENTAS = []
-contadorVentas = 0
-ultimo_error = ""
+INVENTARIO: dict[str, Producto] = {}
+VENTAS: list[Venta] = []
+contadorVentas: int = 0
+ultimo_error: str = ""
 
 
-def reiniciar_sistema():
+def reiniciar_sistema() -> None:
     """Borra todo el estado del sistema (inventario, ventas y folios)."""
     global contadorVentas, ultimo_error
     INVENTARIO.clear()
@@ -20,7 +42,9 @@ def reiniciar_sistema():
     ultimo_error = ""
 
 
-def agregarProducto(codigo, nombre, precio, stock):
+def agregarProducto(
+    codigo: str | None, nombre: str, precio: float, stock: int
+) -> bool:
     # valida los datos y da de alta un producto en el inventario
     global ultimo_error
     if codigo is None or codigo == "":
@@ -35,16 +59,17 @@ def agregarProducto(codigo, nombre, precio, stock):
     if stock < 0:
         ultimo_error = "stock invalido"
         return False
-    x = {}
-    x["codigo"] = codigo
-    x["nombre"] = nombre
-    x["precio"] = precio
-    x["stock"] = stock
+    x: Producto = {
+        "codigo": codigo,
+        "nombre": nombre,
+        "precio": precio,
+        "stock": stock,
+    }
     INVENTARIO[codigo] = x
     return True
 
 
-def eliminar_producto(codigo):
+def eliminar_producto(codigo: str) -> bool:
     """Quita un producto del inventario. Regresa False si no existe."""
     global ultimo_error
     if codigo in INVENTARIO:
@@ -54,7 +79,7 @@ def eliminar_producto(codigo):
     return False
 
 
-def actualizar_stock(codigo, cantidad):
+def actualizar_stock(codigo: str, cantidad: int) -> bool:
     """Suma unidades al stock (o resta si la cantidad es negativa)."""
     global ultimo_error
     if codigo not in INVENTARIO:
@@ -68,7 +93,7 @@ def actualizar_stock(codigo, cantidad):
     return True
 
 
-def buscarProducto(texto):
+def buscarProducto(texto: str) -> list[Producto]:
     # busca productos cuyo nombre contenga el texto (sin importar mayusculas)
     temp2 = []
     for k in INVENTARIO:
@@ -77,7 +102,9 @@ def buscarProducto(texto):
     return temp2
 
 
-def registrar_venta(codigo, cantidad, cliente=""):
+def registrar_venta(
+    codigo: str | None, cantidad: int | None, cliente: str | None = ""
+) -> Venta | None:
     """Registra una venta completa.
 
     Esta funcion hace de todo: valida los datos, calcula descuentos e
@@ -155,7 +182,7 @@ def registrar_venta(codigo, cantidad, cliente=""):
     return venta
 
 
-def cotizar(codigo, cantidad):
+def cotizar(codigo: str, cantidad: int | None) -> float | None:
     """Calcula cuanto costaria una compra sin registrar la venta."""
     global ultimo_error
     if codigo not in INVENTARIO:

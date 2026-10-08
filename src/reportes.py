@@ -3,12 +3,12 @@
 import gestor
 
 
-def hacer_cosa(v):
+def hacer_cosa(v: float) -> str:
     # le da formato de dinero al numero
     return "$" + str(round(v, 2))
 
 
-def productos_stock_bajo():
+def productos_stock_bajo() -> list[gestor.Producto]:
     """Regresa la lista de productos con stock por debajo del minimo."""
     temp2 = []
     for k in gestor.INVENTARIO:
@@ -17,7 +17,7 @@ def productos_stock_bajo():
     return temp2
 
 
-def reporte_inventario():
+def reporte_inventario() -> str:
     """Arma el reporte del inventario, lo imprime y lo regresa como texto."""
     s = "===== INVENTARIO =====\n"
     aux = 0
@@ -34,7 +34,7 @@ def reporte_inventario():
     return s
 
 
-def total_vendido():
+def total_vendido() -> float:
     """Suma el total (con IVA) de todas las ventas registradas."""
     t = 0
     for v in gestor.VENTAS:
@@ -42,7 +42,7 @@ def total_vendido():
     return round(t, 2)
 
 
-def mas_vendidos(n=3):
+def mas_vendidos(n: int = 3) -> list[tuple[str, int]]:
     """Regresa los n productos mas vendidos como lista de (codigo, unidades)."""
     aux = {}
     for v in gestor.VENTAS:
@@ -63,7 +63,7 @@ def mas_vendidos(n=3):
     return temp[0:n]
 
 
-def resumen_ventas():
+def resumen_ventas() -> str:
     """Arma el resumen de ventas del dia, lo imprime y lo regresa."""
     s = "===== RESUMEN DE VENTAS =====\n"
     t = 0
