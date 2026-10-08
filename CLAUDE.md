@@ -17,7 +17,7 @@ Reto de refactorización: app de consola en Python (inventario y ventas, tienda 
 - NO modificar `tests/` ni `pyproject.toml` (config de ruff: C90 max-complexity 10, naming PEP 8, SIM, UP, etc.).
 - Comportamiento observable idéntico; los tests son de caja negra. Correr `pytest`, `ruff check src` y `ruff format --check src` tras CADA refactorización.
 - `agregarProducto` y `buscarProducto` conservan su nombre (los tests los usan; están en `ignore-names`).
-- Entrega: rama `refactorizacion` → PR a `main`, commits atómicos (uno por refactorización), `BITACORA.md` (copia de `BITACORA_TEMPLATE.md`) con prompt/cambio/justificación/resultado de tests por refactorización + reflexión. Mínimo 5 refactorizaciones significativas.
+- Entrega: rama `refactorizacion` → PR a `main`, commits atómicos (uno por refactorización), `docs/bitacora.md` (copia de `BITACORA_TEMPLATE.md`) con prompt/cambio/justificación/resultado de tests por refactorización + reflexión (`docs/reflexion.md`). Mínimo 5 refactorizaciones significativas.
 - `.claudeignore` es parte de la entrega (excluye venvs, cachés, datos generados).
 
 ## Planes
@@ -35,9 +35,9 @@ Guardar todos los planes como archivos Markdown en `/specs` (raíz del repo; cre
 
 Tras `pytest` + `ruff check src` y antes del commit:
 
-- Si `BITACORA.md` no existe, copiar `BITACORA_TEMPLATE.md` → `BITACORA.md` (Nombre: Julio Gonzalez; Matrícula vacía; Fecha = hoy).
+- Si `docs/bitacora.md` no existe, copiar `BITACORA_TEMPLATE.md` → `docs/bitacora.md` (Nombre: Julio Gonzalez; Matrícula vacía; Fecha = hoy).
 - Llenar la siguiente fila vacía de la tabla (agregar fila si pasan de 5): `#` consecutivo; Prompt usado (literal, o resumen fiel); Cambio realizado (1 línea + link a `specs/<plan>.md`); Justificación (smell eliminado / regla ruff); Tests OK (`✅ N passed` o `❌` con resultado real de `pytest`, más conteo de errores ruff).
-- Incluir `BITACORA.md` en el mismo commit atómico del plan.
+- Incluir `docs/bitacora.md` en el mismo commit atómico del plan.
 - No tocar "Reflexión final" (la escribe el usuario).
 - Al fusionar ramas en `refactorizacion`: conservar todas las filas y renumerar.
 
