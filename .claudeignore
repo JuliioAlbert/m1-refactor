@@ -1,0 +1,26 @@
+# Entornos virtuales
+.venv/
+venv/
+env/
+
+# Cachés y bytecode
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Empaquetado / build
+*.egg-info/
+build/
+dist/
+
+# Control de versiones y editores
+.git/
+.idea/
+.vscode/
+.DS_Store
+
+# Datos generados (el de ejemplo, datos_ejemplo.json, sí es relevante)
+datos*.json
+!datos_ejemplo.json
