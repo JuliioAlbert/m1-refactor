@@ -32,6 +32,16 @@ VENTAS: list[Venta] = []
 contadorVentas: int = 0
 ultimo_error: str = ""
 
+# Motivos de error que se dejan en ultimo_error
+ERROR_CODIGO_VACIO = "codigo vacio"
+ERROR_NO_EXISTE = "producto no existe"
+ERROR_YA_EXISTE = "el producto ya existe"
+ERROR_PRECIO = "precio invalido"
+ERROR_STOCK = "stock invalido"
+ERROR_STOCK_NEGATIVO = "el stock no puede quedar negativo"
+ERROR_CANTIDAD = "cantidad invalida"
+ERROR_STOCK_INSUFICIENTE = "stock insuficiente"
+
 
 def reiniciar_sistema() -> None:
     """Borra todo el estado del sistema (inventario, ventas y folios)."""
@@ -48,16 +58,16 @@ def agregarProducto(
     # valida los datos y da de alta un producto en el inventario
     global ultimo_error
     if codigo is None or codigo == "":
-        ultimo_error = "codigo vacio"
+        ultimo_error = ERROR_CODIGO_VACIO
         return False
     if codigo in INVENTARIO:
-        ultimo_error = "el producto ya existe"
+        ultimo_error = ERROR_YA_EXISTE
         return False
     if precio <= 0:
-        ultimo_error = "precio invalido"
+        ultimo_error = ERROR_PRECIO
         return False
     if stock < 0:
-        ultimo_error = "stock invalido"
+        ultimo_error = ERROR_STOCK
         return False
     x: Producto = {
         "codigo": codigo,
@@ -75,7 +85,7 @@ def eliminar_producto(codigo: str) -> bool:
     if codigo in INVENTARIO:
         del INVENTARIO[codigo]
         return True
-    ultimo_error = "producto no existe"
+    ultimo_error = ERROR_NO_EXISTE
     return False
 
 
@@ -83,11 +93,11 @@ def actualizar_stock(codigo: str, cantidad: int) -> bool:
     """Suma unidades al stock (o resta si la cantidad es negativa)."""
     global ultimo_error
     if codigo not in INVENTARIO:
-        ultimo_error = "producto no existe"
+        ultimo_error = ERROR_NO_EXISTE
         return False
     aux = INVENTARIO[codigo]["stock"] + cantidad
     if aux < 0:
-        ultimo_error = "el stock no puede quedar negativo"
+        ultimo_error = ERROR_STOCK_NEGATIVO
         return False
     INVENTARIO[codigo]["stock"] = aux
     return True
@@ -106,16 +116,16 @@ def _validar_venta(codigo: str | None, cantidad: int | None) -> Producto | None:
     """Regresa el producto si la venta es valida; si no, fija ultimo_error."""
     global ultimo_error
     if codigo is None or codigo == "":
-        ultimo_error = "codigo vacio"
+        ultimo_error = ERROR_CODIGO_VACIO
         return None
     if codigo not in INVENTARIO:
-        ultimo_error = "producto no existe"
+        ultimo_error = ERROR_NO_EXISTE
         return None
     if cantidad is None or cantidad <= 0:
-        ultimo_error = "cantidad invalida"
+        ultimo_error = ERROR_CANTIDAD
         return None
     if INVENTARIO[codigo]["stock"] < cantidad:
-        ultimo_error = "stock insuficiente"
+        ultimo_error = ERROR_STOCK_INSUFICIENTE
         return None
     return INVENTARIO[codigo]
 
@@ -190,10 +200,10 @@ def cotizar(codigo: str, cantidad: int | None) -> float | None:
     """Calcula cuanto costaria una compra sin registrar la venta."""
     global ultimo_error
     if codigo not in INVENTARIO:
-        ultimo_error = "producto no existe"
+        ultimo_error = ERROR_NO_EXISTE
         return None
     if cantidad is None or cantidad <= 0:
-        ultimo_error = "cantidad invalida"
+        ultimo_error = ERROR_CANTIDAD
         return None
     subtotal = INVENTARIO[codigo]["precio"] * cantidad
     base = subtotal - _descuento_volumen(subtotal)

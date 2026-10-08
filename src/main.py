@@ -1,5 +1,6 @@
 """Punto de entrada del gestor de tienda (menu interactivo en consola)."""
 
+import math
 from collections.abc import Callable
 
 import gestor
@@ -14,9 +15,21 @@ def pedir_numero(mensaje: str) -> float:
     while True:
         temp2 = input(mensaje)
         try:
-            return float(temp2)
+            numero = float(temp2)
         except ValueError:
-            print("Eso no es un numero, intenta de nuevo.")
+            numero = math.nan
+        if math.isfinite(numero):
+            return numero
+        print("Eso no es un numero, intenta de nuevo.")
+
+
+def pedir_entero(mensaje: str) -> int:
+    # pide un numero entero (acepta 2 o 2.0, rechaza fracciones)
+    while True:
+        numero = pedir_numero(mensaje)
+        if numero.is_integer():
+            return int(numero)
+        print("Debe ser un numero entero, intenta de nuevo.")
 
 
 def _mostrar_error() -> None:
@@ -39,7 +52,7 @@ def _opcion_agregar_producto() -> None:
     c = input("Codigo: ")
     n = input("Nombre: ")
     p = pedir_numero("Precio: ")
-    s = int(pedir_numero("Stock inicial: "))
+    s = pedir_entero("Stock inicial: ")
     if gestor.agregarProducto(c, n, p, s):
         print("Producto agregado.")
     else:
@@ -48,7 +61,7 @@ def _opcion_agregar_producto() -> None:
 
 def _opcion_registrar_venta() -> None:
     c = input("Codigo del producto: ")
-    cant = int(pedir_numero("Cantidad: "))
+    cant = pedir_entero("Cantidad: ")
     cli = input("Codigo de cliente (enter si no tiene): ")
     v = gestor.registrar_venta(c, cant, cli)
     if v is not None:
@@ -59,7 +72,7 @@ def _opcion_registrar_venta() -> None:
 
 def _opcion_cotizar() -> None:
     c = input("Codigo del producto: ")
-    cant = int(pedir_numero("Cantidad: "))
+    cant = pedir_entero("Cantidad: ")
     t = gestor.cotizar(c, cant)
     if t is not None:
         print("Total estimado (con IVA): $" + str(t))
@@ -95,14 +108,18 @@ ACCIONES: dict[str, Callable[[], object]] = {
 def menu() -> None:
     print("Bienvenido al gestor de la tienda La Esquina")
     if almacen.hayArchivo(ARCHIVO):
-        almacen.cargar_datos(ARCHIVO)
-        print("Datos cargados de", ARCHIVO)
+        if almacen.cargar_datos(ARCHIVO):
+            print("Datos cargados de", ARCHIVO)
+        else:
+            _mostrar_error()
     while True:
         _imprimir_opciones()
         op = input("Opcion: ")
         if op == "8":
-            almacen.guardar_datos(ARCHIVO)
-            print("Datos guardados. Hasta luego.")
+            if almacen.guardar_datos(ARCHIVO):
+                print("Datos guardados. Hasta luego.")
+            else:
+                _mostrar_error()
             break
         accion = ACCIONES.get(op)
         if accion is None:
